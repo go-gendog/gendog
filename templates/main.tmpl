@@ -3,5 +3,6 @@ package main
 import "fmt"
 
 func main() {
-    fmt.Println("Hello, {{.Name}}!")
+    fmt.Println("Hello, {{.User.Name}}!")
+    fmt.Println("{{.Math.Num1 -}} + {{- .Math.Num2}}={{.Math.Num3}}")
 }

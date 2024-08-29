@@ -9,16 +9,6 @@ import (
 	"text/template"
 )
 
-type User struct {
-	Name string
-}
-
-type Math struct {
-	Num1 int
-	Num2 int
-	Num3 int
-}
-
 func main() {
 	// Open the templates folder
 	tmpl := "templates/"
