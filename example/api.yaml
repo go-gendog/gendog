@@ -1,0 +1,52 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: A ping server
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://localhost:8080
+    description: Localhost server
+    variables:
+      port:
+        default: "8080"
+paths:
+  /ping:
+    get:
+      operationId: GetPing
+      description: Get a simple pong response
+      responses:
+        '200':
+          description: Pong response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+        '500':
+          $ref: '#/components/responses/internal-error'
+components:
+  responses:
+    internal-error:
+      description: 500 INTERNAL SERVER ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InternalServerError'
+  schemas:
+    PingResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: pong
+    InternalServerError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: internal server error

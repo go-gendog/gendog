@@ -1,66 +1,38 @@
 package main
 
 import (
-	"fmt"
-	"io"
+	"embed"
 	"log"
-	"os"
-	"path/filepath"
-	"text/template"
+	"strings"
+
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
-type User struct {
-	Name string
-}
-
-type Math struct {
-	Num1 int
-	Num2 int
-	Num3 int
-}
+//go:embed templates/*
+var templates embed.FS
 
 func main() {
-	// Open the templates folder
-	tmpl := "templates/"
-	dirEntries, err := os.ReadDir(tmpl)
+	// Read the template files from the templates
+	// directory in the embedded filesystem.
+	dirEntries, err := templates.ReadDir("templates")
 	if err != nil {
 		log.Fatalf("Failed to read directory: %v", err)
 	}
 
-	// Read all files into a []string
-	var templates []string
+	// Read all files into a map
+	tmpl := make(map[string]string, len(dirEntries))
 	for _, entry := range dirEntries {
-		if !entry.IsDir() {
-			file, err := os.Open(filepath.Join(tmpl, entry.Name()))
-			if err != nil {
-				log.Fatalf("Failed to open file %s: %v", entry.Name(), err)
-			}
-			defer func(file *os.File) {
-				_ = file.Close()
-			}(file)
-
-			content, err := io.ReadAll(file)
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".tmpl") {
+			content, err := templates.ReadFile("templates/" + entry.Name())
 			if err != nil {
 				log.Fatalf("Failed to read file %s: %v", entry.Name(), err)
 			}
-
-			templates = append(templates, string(content))
+			name := strings.TrimSuffix(entry.Name(), ".tmpl")
+			tmpl[name] = string(content)
 		}
 	}
 
-	// Create a new text/template with each string and execute with an example map
-	for _, tmplStr := range templates {
-		tmpl, err := template.New("example").Parse(tmplStr)
-		if err != nil {
-			log.Fatalf("Failed to parse template: %v", err)
-		}
-		err = tmpl.Execute(os.Stdout, map[string]interface{}{
-			"User": User{Name: "John"},
-			"Math": Math{Num1: 1, Num2: 2, Num3: 3},
-		})
-		if err != nil {
-			log.Fatalf("Failed to execute template: %v", err)
-		}
-		fmt.Println()
-	}
+	loader := openapi3.NewLoader()
+	doc, err := loader.LoadFromFile("my-openapi-spec.json")
+
 }
