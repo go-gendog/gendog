@@ -4,16 +4,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"example/gen"
 )
 
 func main() {
 	server := Server{}
-	r := http.NewServeMux()
-	h := HandlerWithOptions(
-		&server, StdHTTPServerOptions{
-			BaseRouter: r,
-		},
-	)
+	h := gen.Handler(&server)
 
 	s := &http.Server{
 		Handler: h,
@@ -25,14 +22,14 @@ func main() {
 	}
 }
 
-var _ ServerInterface = (*Server)(nil)
+var _ gen.ServerInterface = (*Server)(nil)
 
 type Server struct{}
 
 func (s Server) GetPing(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(PingResponse{
+	_ = json.NewEncoder(w).Encode(gen.PingResponse{
 		Message: "pong",
 	})
 }
